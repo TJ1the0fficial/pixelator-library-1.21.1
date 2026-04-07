@@ -49,8 +49,6 @@ public class pixelator {
         // Register the commonSetup method for modloading
         modEventBus.addListener(this::commonSetup);
 
-        modEventBus.addListener(this::onGatherData);
-
         // Register ourselves for server and other game events we are interested in.
         // Note that this is necessary if and only if we want *this* class (pixelator) to respond directly to events.
         // Do not add this line if there are no @SubscribeEvent-annotated functions in this class, like onServerStarting() below.
@@ -58,19 +56,6 @@ public class pixelator {
 
         // Register our mod's ModConfigSpec so that FML can create and load the config file for us
         modContainer.registerConfig(ModConfig.Type.COMMON, Config.SPEC);
-    }
-
-    public static void registerDataGen(GatherDataEvent event) {
-        DataGenerator generator = event.getGenerator();
-        PackOutput output = generator.getPackOutput();
-
-        // Tell NeoForge to run your provider during the 'Client' data phase
-        generator.addProvider(event.includeClient(), new PixelatorDataProvider(output));
-    }
-
-    private void onGatherData(GatherDataEvent event) {
-        // One line of code to run your whole system!
-        registerDataGen(event);
     }
 
     private void commonSetup(FMLCommonSetupEvent event) {

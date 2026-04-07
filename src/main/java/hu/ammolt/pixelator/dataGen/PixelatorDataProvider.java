@@ -29,10 +29,6 @@ public class PixelatorDataProvider implements DataProvider {
         Path sourceRoot = projectRoot.resolve("src").resolve("main").resolve("resources");
         Path outputRoot = output.getOutputFolder(); // This is already handled by NeoForge
 
-        System.out.println("LOGIC CHECK:");
-        System.out.println("I will READ templates from: " + sourceRoot);
-        System.out.println("I will WRITE items to: " + outputRoot);
-
         try {
             // 3. Set the paths and run
             Generator.setupPaths(pixelator.MODID, sourceRoot, outputRoot);
