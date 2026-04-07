@@ -1,6 +1,7 @@
 To use this modpack, setup the data gen.
 
 //TODO: or whatever. I hope I don't forget it to show you how you can do that
+[![](https://jitpack.io/v/TJ1the0fficial/pixelator-library-1.21.1.svg)](https://jitpack.io/#TJ1the0fficial/pixelator-library-1.21.1)
 
 Change default path with setupPath()!
 
