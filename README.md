@@ -27,13 +27,18 @@ public class PixelatorProvider extends PixelatorDataProvider {
 
         try {
             // 3. Set the paths and run
-            Generator.setupPaths(pixelator.MODID, sourceRoot, outputRoot); // Change the pixelator.MODID to yours
+            Generator.setupPaths(your_awesome_mod.MODID, sourceRoot, outputRoot);
             Generator.generator();
         } catch (Exception e) {
             e.printStackTrace();
         }
 
         return CompletableFuture.completedFuture(null);
+    }
+    
+    @Override
+    public String getName() {
+        return "Pixelator: " + PixelatorGenerator.getModId();
     }
 
     @SubscribeEvent
@@ -50,7 +55,7 @@ public class PixelatorProvider extends PixelatorDataProvider {
 
 Optional DataGenerator (I assume you will use DataGenerator class)
 ```
-@EventBusSubscriber(modid = ToolProgressionOverhaul.MODID)
+@EventBusSubscriber(modid = your_awesome_mod.MODID)
 public class DataGenerators {
     @SubscribeEvent
     public static void gatherData(GatherDataEvent event) {
@@ -62,36 +67,33 @@ public class DataGenerators {
     }
 }
 ```
-
 Then use : 
 ```
 modEventBus.addListener(DataGenerators::gatherData);
 ```
 in your main file
-```
-// Gives you folders if it works, then do what is written below
-// It might crash with Invocation Error. The folders are created though.
-```
 
 ## Use
-Put the templates (iron_sword.png) into the templates folder under pixelator.
-Change name of template. (iron_sword.png -> sword.png (The program uses the image's name for full freedom with naming))
+Put the templates (iron_sword.png) into the templates folder under pixelator.<br>
+Change name of template. (iron_sword.png -> sword.png (The program uses the image's name for full freedom with naming))<br>
 
-Then put the materials (diamond.png) into the materials folder.
+Then put the materials (diamond.png) into the materials folder.<br>
 
-Then put the handles (stuff you don't want to color, like the vanilla stick) into the handles folder.
+Then put the handles (stuff you don't want to color, like the vanilla stick) into the handles folder.<br>
 
-Run DataGen.
+Run DataGen.<br>
 
-You will see the outcome. template*material textures
+You will see the outcome. template*material textures<br>
 
 
 ## How does this work though?
 
-This mod checks every color in the template, then it checks the material's and the handle's pixels too.
-template - this software copies the image and then replaces the colors based on brightness
-material - the software uses the material's colors to paint over the copied template
-handle - a filter on what not to color on the template
+This mod checks every color in the template, then it checks the material's and the handle's pixels too.<br>
+template - this software copies the image and then replaces the colors based on brightness<br>
+material - the software uses the material's colors to paint over the copied template<br>
+handle - a filter on what not to color on the template<br>
+
+https://mcasset.cloud/26.1.1/assets/minecraft/textures<br>
 
 template:<br>
 <img width="160" height="160" alt="sword" src="https://github.com/user-attachments/assets/eccbbe27-58b8-4ecb-b0b1-d47e2a71d8f5" /><br>
