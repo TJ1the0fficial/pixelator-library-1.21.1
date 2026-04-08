@@ -26,7 +26,7 @@ public class PixelatorDataProvider implements DataProvider {
 
         try {
             // 3. Set the paths and run
-            PixelatorGenerator.setupPaths(pixelator.MODID, sourceRoot, outputRoot);
+            PixelatorGenerator.setupPaths(your_awesome_mod.MODID, sourceRoot, outputRoot);
             PixelatorGenerator.generator(cache);
         } catch (Exception e) {
             e.printStackTrace();
