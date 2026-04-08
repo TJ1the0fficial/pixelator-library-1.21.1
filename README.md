@@ -25,7 +25,8 @@ public class PixelatorDataProvider implements DataProvider {
         Path outputRoot = output.getOutputFolder(); // This is already handled by NeoForge
 
         try {
-            // 3. Set the paths and run
+            // 3. Set the paths
+            // setupPaths() sets up the namespace on where the output will be, the other two parameters are shown above
             PixelatorGenerator.setupPaths(your_awesome_mod.MODID, sourceRoot, outputRoot);
             PixelatorGenerator.generator(cache);
         } catch (Exception e) {
@@ -77,6 +78,7 @@ material - the software uses the material's colors to paint over the copied temp
 handle - a filter on what not to color on the template<br>
 
 https://mcasset.cloud/26.1.1/assets/minecraft/textures<br>
+<a href="templateAssets.zip" download>Download template assets that I put together!</a>
 
 template:<br>
 <img width="160" height="160" alt="sword" src="https://github.com/user-attachments/assets/eccbbe27-58b8-4ecb-b0b1-d47e2a71d8f5" /><br>
