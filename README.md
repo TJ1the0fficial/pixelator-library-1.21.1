@@ -93,6 +93,8 @@ template - this software copies the image and then replaces the colors based on 
 material - the software uses the material's colors to paint over the copied template<br>
 handle - a filter on what not to color on the template<br>
 
+https://mcasset.cloud/26.1.1/assets/minecraft/textures<br>
+
 template:<br>
 <img width="160" height="160" alt="sword" src="https://github.com/user-attachments/assets/eccbbe27-58b8-4ecb-b0b1-d47e2a71d8f5" /><br>
 material:<br>
