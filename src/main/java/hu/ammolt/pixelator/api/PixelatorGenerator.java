@@ -11,7 +11,7 @@ import java.util.*;
 import java.util.List;
 import java.nio.file.Path;
 
-public class Generator {
+public class PixelatorGenerator {
     // calc brightness from 3 values, Red Green Blue from RGB image
     private static int calculateBrightness(int R, int G, int B) {
         return ((int) (0.2126 * R + 0.7152 * G + 0.0722 * B));
@@ -40,7 +40,7 @@ public class Generator {
 
         java.util.List<Color> palette = new ArrayList<>(materialColors);
 
-        palette.sort(Comparator.comparingInt(Generator::calculateBrightness));
+        palette.sort(Comparator.comparingInt(PixelatorGenerator::calculateBrightness));
         palette.remove(palette.getLast()); // Remove the lightest color, most likely white, which is not pure white though
 
         List<Color> generatedColors = new ArrayList<>();
@@ -102,6 +102,10 @@ public class Generator {
         outputPath = outputRoot.resolve("assets").resolve(modId).resolve("textures").resolve("item");
     }
 
+    public static String getModId() {
+        return modId;
+    }
+
     private static Path getPathToMaterials() { return inputPath.resolve("materials"); }
     private static Path getPathToHandles() { return inputPath.resolve("handles"); }
     private static Path getPathToTemplates() { return inputPath.resolve("templates"); }
@@ -113,7 +117,7 @@ public class Generator {
 
         // ------- Folders and their contents -------- //
         if (inputPath == null || outputPath == null) {
-            throw new IOException("Generator paths not initialized! Call setupPaths() first.");
+            throw new IOException("PixelatorGenerator paths not initialized! Call setupPaths() first.");
         }
 
         Path pathToMaterials = getPathToMaterials();

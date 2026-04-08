@@ -1,6 +1,6 @@
 package hu.ammolt.pixelator.dataGen;
 
-import hu.ammolt.pixelator.api.Generator;
+import hu.ammolt.pixelator.api.PixelatorGenerator;
 import hu.ammolt.pixelator.pixelator;
 import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataProvider;
@@ -31,8 +31,8 @@ public class PixelatorDataProvider implements DataProvider {
 
         try {
             // 3. Set the paths and run
-            Generator.setupPaths(pixelator.MODID, sourceRoot, outputRoot);
-            Generator.generator();
+            PixelatorGenerator.setupPaths(pixelator.MODID, sourceRoot, outputRoot);
+            PixelatorGenerator.generator();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -42,6 +42,6 @@ public class PixelatorDataProvider implements DataProvider {
 
     @Override
     public String getName() {
-        return "Pixelator Texture Generator";
+        return "Pixelator: " + PixelatorGenerator.getModId();
     }
 }
