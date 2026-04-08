@@ -27,13 +27,18 @@ public class PixelatorProvider extends PixelatorDataProvider {
 
         try {
             // 3. Set the paths and run
-            Generator.setupPaths(pixelator.MODID, sourceRoot, outputRoot); // Change the pixelator.MODID to yours
+            Generator.setupPaths(your_awesome_mod.MODID, sourceRoot, outputRoot);
             Generator.generator();
         } catch (Exception e) {
             e.printStackTrace();
         }
 
         return CompletableFuture.completedFuture(null);
+    }
+    
+    @Override
+    public String getName() {
+        return "Pixelator: " + PixelatorGenerator.getModId();
     }
 
     @SubscribeEvent
@@ -50,7 +55,7 @@ public class PixelatorProvider extends PixelatorDataProvider {
 
 Optional DataGenerator (I assume you will use DataGenerator class)
 ```
-@EventBusSubscriber(modid = ToolProgressionOverhaul.MODID)
+@EventBusSubscriber(modid = your_awesome_mod.MODID)
 public class DataGenerators {
     @SubscribeEvent
     public static void gatherData(GatherDataEvent event) {
@@ -62,16 +67,11 @@ public class DataGenerators {
     }
 }
 ```
-
 Then use : 
 ```
 modEventBus.addListener(DataGenerators::gatherData);
 ```
 in your main file
-```
-// Gives you folders if it works, then do what is written below
-// It might crash with Invocation Error. The folders are created though.
-```
 
 ## Use
 Put the templates (iron_sword.png) into the templates folder under pixelator.
