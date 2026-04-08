@@ -1,10 +1,16 @@
 package hu.ammolt.pixelator.api;
 
+import com.google.common.hash.HashCode;
+import com.google.common.hash.Hashing;
+import net.minecraft.data.CachedOutput;
+import net.minecraft.data.DataProvider;
+
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.awt.image.Raster;
 import java.awt.image.WritableRaster;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
@@ -57,7 +63,7 @@ public class PixelatorGenerator {
 
             if (Math.abs(b1 - b2) >= 9) {
                 generatedColors.add(new Color(
-                        ((c1.getRed() + c2.getRed()) / 4),
+                        ((c1.getRed() + c2.getRed()) / 4), // magic numbers
                         ((c1.getGreen() + c2.getGreen()) / 4),
                         ((c1.getBlue() + c2.getBlue()) / 4)
                 ));
@@ -111,7 +117,7 @@ public class PixelatorGenerator {
     private static Path getPathToTemplates() { return inputPath.resolve("templates"); }
     // ----------------------------- //
 
-    public static void generator() throws IOException {
+    public static void generator(CachedOutput cache) throws IOException {
         HashMap<String, HashSet<Color>> colors = new HashMap<>();
         HashMap<String, HashSet<Color>> handleColors = new HashMap<>();
 
@@ -138,6 +144,27 @@ public class PixelatorGenerator {
         if (!templatesDirectory.exists()) templatesDirectory.mkdirs();
         File[] templates = templatesDirectory.listFiles();
         if (templates == null) templates = new File[0];
+
+        System.out.println("\n\n\n[Pixelator] Logic Check:");
+        System.out.println(" > Reading Materials from: " + getPathToMaterials().toAbsolutePath());
+        System.out.println(" > Reading Templates from: " + getPathToTemplates().toAbsolutePath());
+        System.out.println(" > Writing Items to: " + outputPath.toAbsolutePath() + "\n\n\n");
+
+        // We only mkdirs() if we are WRITING. For reading, we just check if it exists.
+        if (!materialsDirectory.exists()) {
+            System.out.println("[Pixelator] WARNING: Input folder not found at " + materialsDirectory.getAbsolutePath());
+            materialsDirectory.mkdirs(); // Creates it so you can see where it was supposed to be
+        }
+
+        File matDir = getPathToMaterials().toFile();
+        File[] mats = matDir.listFiles();
+        System.out.println("\n\n\n[Pixelator] Materials folder: " + matDir.getAbsolutePath());
+        System.out.println("[Pixelator] Files found: " + (mats != null ? mats.length : 0) + "\n\n\n");
+
+        if (mats == null || mats.length == 0) {
+            System.out.println("[Pixelator] ABORTING: No material files found. Check your paths!\n\n\n");
+            return;
+        }
         // ------------------------------------------- //
 
         for (File material : materials) {
@@ -232,7 +259,20 @@ public class PixelatorGenerator {
                     // Ensure the 'item' folder exists
                     if (!outputFile.getParentFile().exists()) outputFile.getParentFile().mkdirs();
 
-                    ImageIO.write(newTexture, "png", outputFile);
+//                    ImageIO.write(newTexture, "png", outputFile);
+
+                    // 1. Convert BufferedImage to bytes
+                    ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
+                    ImageIO.write(newTexture, "png", byteStream);
+                    byte[] imageData = byteStream.toByteArray();
+
+                    // 2. Generate a SHA-1 Hash (This is how Minecraft tracks "Stale" files)
+                    // Guava (com.google.common) is built into Minecraft, so you can use this:
+                    HashCode hash = Hashing.sha256().hashBytes(imageData);
+
+                    // 3. Save officially using the cache
+                    // Note: This method throws IOException, so make sure your loop handles it
+                    cache.writeIfNeeded(outputPath.resolve(outputFileName), imageData, hash);
                 }
             }
         }

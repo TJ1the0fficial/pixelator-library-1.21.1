@@ -23,16 +23,22 @@ public class PixelatorDataProvider implements DataProvider {
     public CompletableFuture<?> run(CachedOutput cache) {
         // 1. Get the Project Root by going up from the 'run' folder
         // '..' tells Java to step out of 'run' and into the main project folder
-        Path projectRoot = Path.of("").toAbsolutePath().getParent();
+        Path projectRoot = Path.of("..").toAbsolutePath().getParent();
 
-        // 2. Now we point to the REAL source and the REAL generated output
+//        // 2. Now we point to the REAL source and the REAL generated output
+//        Path sourceRoot = projectRoot.resolve("src").resolve("main").resolve("resources");
+//        Path outputRoot = output.getOutputFolder(); // This is already handled by NeoForge
+
+        Path testOutput = projectRoot.resolve("test_output");
         Path sourceRoot = projectRoot.resolve("src").resolve("main").resolve("resources");
-        Path outputRoot = output.getOutputFolder(); // This is already handled by NeoForge
+
+        System.out.println("\n\n\n[Pixelator] FORCING OUTPUT TO: " + testOutput + "\n\n\n");
 
         try {
             // 3. Set the paths and run
-            PixelatorGenerator.setupPaths(pixelator.MODID, sourceRoot, outputRoot);
-            PixelatorGenerator.generator();
+//            PixelatorGenerator.setupPaths(pixelator.MODID, sourceRoot, outputRoot);
+            PixelatorGenerator.setupPaths(pixelator.MODID, sourceRoot, testOutput);
+            PixelatorGenerator.generator(cache);
         } catch (Exception e) {
             e.printStackTrace();
         }
