@@ -1,20 +1,105 @@
-To use this modpack, setup the data gen.
+# Pixelator Library Mod
+## Setup
+To use this mod library, setup the data gen.
 
-//TODO: or whatever. I hope I don't forget it to show you how you can do that
 [![](https://jitpack.io/v/TJ1the0fficial/pixelator-library-1.21.1.svg)](https://jitpack.io/#TJ1the0fficial/pixelator-library-1.21.1)
 
-Change default path with setupPath()!
+Provider
+```
+// Doesn't include libraries or anything, just the classes
+public class PixelatorProvider extends PixelatorDataProvider {
+    private final PackOutput output;
 
-Then run DataGen.
+    public PixelatorProvider(PackOutput output) {
+        super(output);
+        this.output = output;
+    }
 
-Then put the templates (iron_sword.png) into the templates folder under pixelator.
-Change name of template. (iron_sword.png -> sword.png)
+    @Override
+    public CompletableFuture<?> run(CachedOutput cache) {
+        // 1. Get the Project Root by going up from the 'run' folder
+        // '..' tells Java to step out of 'run' and into the main project folder
+        Path projectRoot = Path.of("").toAbsolutePath().getParent();
+
+        // 2. Now we point to the REAL source and the REAL generated output
+        Path sourceRoot = projectRoot.resolve("src").resolve("main").resolve("resources");
+        Path outputRoot = output.getOutputFolder(); // This is already handled by NeoForge
+
+        try {
+            // 3. Set the paths and run
+            Generator.setupPaths(pixelator.MODID, sourceRoot, outputRoot); // Change the pixelator.MODID to yours
+            Generator.generator();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return CompletableFuture.completedFuture(null);
+    }
+
+    @SubscribeEvent
+    public static void gatherData(GatherDataEvent event) {
+        PackOutput output = event.getGenerator().getPackOutput();
+
+        event.getGenerator().addProvider(
+                event.includeServer(),
+                new PixelatorProvider(output)
+        );
+    }
+}
+```
+
+Optional DataGenerator (I assume you will use DataGenerator class)
+```
+@EventBusSubscriber(modid = ToolProgressionOverhaul.MODID)
+public class DataGenerators {
+    @SubscribeEvent
+    public static void gatherData(GatherDataEvent event) {
+        DataGenerator generator = event.getGenerator();
+        PackOutput packOutput = generator.getPackOutput();
+
+        generator.addProvider(event.includeServer(), new PixelatorProvider(packOutput));
+
+    }
+}
+```
+
+Then use : 
+```
+modEventBus.addListener(DataGenerators::gatherData);
+```
+in your main file
+```
+// Gives you folders if it works, then do what is written below
+// It might crash with Invocation Error. The folders are created though.
+```
+
+## Use
+Put the templates (iron_sword.png) into the templates folder under pixelator.
+Change name of template. (iron_sword.png -> sword.png (The program uses the image's name for full freedom with naming))
 
 Then put the materials (diamond.png) into the materials folder.
 
 Then put the handles (stuff you don't want to color, like the vanilla stick) into the handles folder.
 
-Run DataGen. 
+Run DataGen.
 
 You will see the outcome. template*material textures
 
+
+## How does this work though?
+
+This mod checks every color in the template, then it checks the material's and the handle's pixels too.
+template - this software copies the image and then replaces the colors based on brightness
+material - the software uses the material's colors to paint over the copied template
+handle - a filter on what not to color on the template
+
+template:<br>
+<img width="160" height="160" alt="sword" src="https://github.com/user-attachments/assets/eccbbe27-58b8-4ecb-b0b1-d47e2a71d8f5" /><br>
+material:<br>
+<img width="160" height="160" alt="diamond" src="https://github.com/user-attachments/assets/d4c85211-4edd-42a1-af90-d07d3237fb0a" /><br>
+handle:<br>
+<img width="160" height="160" alt="stick" src="https://github.com/user-attachments/assets/1ec106cf-78db-423d-bbe6-5081ca4e915a" /><br>
+generated diamond sword:<br>
+<img width="160" height="160" alt="generated_diamond_sword" src="https://github.com/user-attachments/assets/d705c043-bb82-4e7e-8bcb-38b9a0cac9be" /><br>
+original diamond sword:<br>
+<img width="160" height="160" alt="original_diamond_sword" src="https://github.com/user-attachments/assets/7cdda573-3a95-4b25-9799-0b3ac9d48193" /><br>
