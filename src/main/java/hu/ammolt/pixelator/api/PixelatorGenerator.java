@@ -38,61 +38,30 @@ public class PixelatorGenerator {
         return smallestNumber;
     }
 
-    private static Color getClosestColor(HashSet<Color> materialColors, Color newToolColor) {
-        if (materialColors.isEmpty()) return Color.MAGENTA; // Error fallback
+    public static Color getClosestColor(HashSet<Color> palette, Color templatePixelColor, float templateMin, float templateMax) {
+        List<Color> sortedPalette = new ArrayList<>(palette);
+        sortedPalette.sort(Comparator.comparingInt(PixelatorGenerator::calculateBrightness));
 
-        int leastDifference = Integer.MAX_VALUE;
-        Color lastColor = Color.PINK;
+        if (sortedPalette.isEmpty()) return Color.MAGENTA;
 
-        java.util.List<Color> palette = new ArrayList<>(materialColors);
+        // 1. Get template brightness
+        int bee = calculateBrightness(templatePixelColor);
 
-        palette.sort(Comparator.comparingInt(PixelatorGenerator::calculateBrightness));
-        palette.remove(palette.getLast()); // Remove the lightest color, most likely white, which is not pure white though
+        // no 2. deleted
 
-        java.util.List<Color> reversedPalette = new ArrayList<>(palette.reversed());
+        // 3. Calculate the "Percentage" (0.0 to 1.0)
+        // This tells us: is this pixel a shadow, a midtone, or a highlight?
+        float percent = (bee - templateMin) / (templateMax - templateMin);
 
-        List<Color> generatedColors = new ArrayList<>();
+        // Clamp it so it doesn't go below 0 or above 1
+        percent = Math.max(0f, Math.min(1f, percent));
 
-        Color c1;
-        Color c2;
+        // 4. Map that percentage to your palette index
+        // If percent is 0.0 (shadow), it picks index 0.
+        // If percent is 1.0 (highlight), it picks the last index.
+        int targetIndex = (int) (percent * (sortedPalette.size() - 1));
 
-        for (int i = 0; i < reversedPalette.size()-1; ++i) {
-            c1 = reversedPalette.get(i);
-            c2 = reversedPalette.get(i+1);
-
-            int b1 = calculateBrightness(c1);
-            int b2 = calculateBrightness(c2);
-
-            if (Math.abs(b1 - b2) >= 9) {
-                generatedColors.add(new Color(
-                        ((c1.getRed() + c2.getRed()) / 4), // magic numbers
-                        ((c1.getGreen() + c2.getGreen()) / 4),
-                        ((c1.getBlue() + c2.getBlue()) / 4)
-                ));
-            }
-        }
-
-        reversedPalette.addAll(generatedColors);
-
-        Color darkest = reversedPalette.getLast();
-        reversedPalette.add(new Color(darkest.getRed() / 2, darkest.getGreen() / 2, darkest.getBlue() / 2));
-
-        reversedPalette.sort(Comparator.comparingInt(c -> calculateBrightness(c.getRed(),c.getGreen(),c.getBlue())));
-
-        // new tool's selected pixel's brightness calculated from it's RGB color's
-        int bee = calculateBrightness(newToolColor.getRed(),newToolColor.getGreen(),newToolColor.getBlue());
-
-        for (Color currentMaterialColor : reversedPalette) {
-            // currentBee is from currentMaterialColor
-            int currentBee = calculateBrightness(currentMaterialColor.getRed(), currentMaterialColor.getGreen(), currentMaterialColor.getBlue());
-            int conclusion = Math.abs(bee - currentBee);
-
-            if (conclusion < leastDifference) {
-                leastDifference = conclusion;
-                lastColor = currentMaterialColor;
-            }
-        }
-        return lastColor;
+        return sortedPalette.get(targetIndex);
     }
 
     // ------- Folders names -------- //
@@ -230,6 +199,22 @@ public class PixelatorGenerator {
                     newTexture.getGraphics().drawImage(originalTexture, 0, 0, null);
                     WritableRaster textureRaster = newTexture.getRaster();
 
+                    // AI code
+                    int minB = 255;
+                    int maxB = 0;
+                    // Scan the template
+                    for (int y = 0; y < originalTexture.getHeight(); y++) {
+                        for (int x = 0; x < originalTexture.getWidth(); x++) {
+                            Color c = new Color(originalTexture.getRGB(x, y), true);
+                            if (c.getAlpha() > 0 && !handleSet.contains(c)) {
+                                int b = calculateBrightness(c);
+                                if (b < minB) minB = b;
+                                if (b > maxB) maxB = b;
+                            }
+                        }
+                    }
+                    //
+
                     for (int y = 0; y < newTexture.getHeight(); ++y) {
                         for (int x = 0; x < newTexture.getWidth(); ++x) {
                             int[] pixel = new int[4];
@@ -242,7 +227,7 @@ public class PixelatorGenerator {
 
                             if (handleSet.contains(currentColor)) {
                             } else {
-                                currentColor = getClosestColor(colors.get(materialName), currentColor);
+                                currentColor = getClosestColor(colors.get(materialName), currentColor, minB, maxB);
                                 pixel[0] = currentColor.getRed();
                                 pixel[1] = currentColor.getGreen();
                                 pixel[2] = currentColor.getBlue();
