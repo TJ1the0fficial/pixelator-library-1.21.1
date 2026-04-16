@@ -7,11 +7,10 @@ To use this mod library, setup the data gen.
 Provider
 ```
 // Doesn't include libraries or anything, just the classes
-public class PixelatorProvider extends PixelatorDataProvider {
+public class PixelatorDataProvider implements DataProvider {
     private final PackOutput output;
 
-    public PixelatorProvider(PackOutput output) {
-        super(output);
+    public PixelatorDataProvider(PackOutput output) {
         this.output = output;
     }
 
@@ -19,36 +18,27 @@ public class PixelatorProvider extends PixelatorDataProvider {
     public CompletableFuture<?> run(CachedOutput cache) {
         // 1. Get the Project Root by going up from the 'run' folder
         // '..' tells Java to step out of 'run' and into the main project folder
-        Path projectRoot = Path.of("").toAbsolutePath().getParent();
+        Path projectRoot = Path.of("..").toAbsolutePath().getParent();
 
-        // 2. Now we point to the REAL source and the REAL generated output
+//        // 2. Now we point to the REAL source and the REAL generated output
         Path sourceRoot = projectRoot.resolve("src").resolve("main").resolve("resources");
         Path outputRoot = output.getOutputFolder(); // This is already handled by NeoForge
 
         try {
-            // 3. Set the paths and run
-            Generator.setupPaths(your_awesome_mod.MODID, sourceRoot, outputRoot);
-            Generator.generator();
+            // 3. Set the paths
+            // setupPaths() sets up the namespace on where the output will be, the other two parameters are shown above
+            PixelatorGenerator.setupPaths(your_awesome_mod.MODID, sourceRoot, outputRoot);
+            PixelatorGenerator.generator(cache);
         } catch (Exception e) {
             e.printStackTrace();
         }
 
         return CompletableFuture.completedFuture(null);
     }
-    
+
     @Override
     public String getName() {
         return "Pixelator: " + PixelatorGenerator.getModId();
-    }
-
-    @SubscribeEvent
-    public static void gatherData(GatherDataEvent event) {
-        PackOutput output = event.getGenerator().getPackOutput();
-
-        event.getGenerator().addProvider(
-                event.includeServer(),
-                new PixelatorProvider(output)
-        );
     }
 }
 ```
@@ -67,12 +57,6 @@ public class DataGenerators {
     }
 }
 ```
-Then use : 
-```
-modEventBus.addListener(DataGenerators::gatherData);
-```
-in your main file
-
 ## Use
 Put the templates (iron_sword.png) into the templates folder under pixelator.<br>
 Change name of template. (iron_sword.png -> sword.png (The program uses the image's name for full freedom with naming))<br>
@@ -94,6 +78,7 @@ material - the software uses the material's colors to paint over the copied temp
 handle - a filter on what not to color on the template<br>
 
 https://mcasset.cloud/26.1.1/assets/minecraft/textures<br>
+<a href="templateAssets.zip" download>Download template assets that I put together!</a>
 
 template:<br>
 <img width="160" height="160" alt="sword" src="https://github.com/user-attachments/assets/eccbbe27-58b8-4ecb-b0b1-d47e2a71d8f5" /><br>
