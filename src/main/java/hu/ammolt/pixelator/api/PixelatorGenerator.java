@@ -49,14 +49,16 @@ public class PixelatorGenerator {
         palette.sort(Comparator.comparingInt(PixelatorGenerator::calculateBrightness));
         palette.remove(palette.getLast()); // Remove the lightest color, most likely white, which is not pure white though
 
+        java.util.List<Color> reversedPalette = new ArrayList<>(palette.reversed());
+
         List<Color> generatedColors = new ArrayList<>();
 
         Color c1;
         Color c2;
 
-        for (int i = 0; i < palette.size()-1; ++i) {
-            c1 = palette.get(i);
-            c2 = palette.get(i+1);
+        for (int i = 0; i < reversedPalette.size()-1; ++i) {
+            c1 = reversedPalette.get(i);
+            c2 = reversedPalette.get(i+1);
 
             int b1 = calculateBrightness(c1);
             int b2 = calculateBrightness(c2);
@@ -70,17 +72,17 @@ public class PixelatorGenerator {
             }
         }
 
-        palette.addAll(generatedColors);
+        reversedPalette.addAll(generatedColors);
 
-        Color darkest = palette.getFirst();
-        palette.add(new Color(darkest.getRed() / 2, darkest.getGreen() / 2, darkest.getBlue() / 2));
+        Color darkest = reversedPalette.getLast();
+        reversedPalette.add(new Color(darkest.getRed() / 2, darkest.getGreen() / 2, darkest.getBlue() / 2));
 
-        palette.sort(Comparator.comparingInt(c -> calculateBrightness(c.getRed(),c.getGreen(),c.getBlue())));
+        reversedPalette.sort(Comparator.comparingInt(c -> calculateBrightness(c.getRed(),c.getGreen(),c.getBlue())));
 
         // new tool's selected pixel's brightness calculated from it's RGB color's
         int bee = calculateBrightness(newToolColor.getRed(),newToolColor.getGreen(),newToolColor.getBlue());
 
-        for (Color currentMaterialColor : palette) {
+        for (Color currentMaterialColor : reversedPalette) {
             // currentBee is from currentMaterialColor
             int currentBee = calculateBrightness(currentMaterialColor.getRed(), currentMaterialColor.getGreen(), currentMaterialColor.getBlue());
             int conclusion = Math.abs(bee - currentBee);
@@ -258,8 +260,6 @@ public class PixelatorGenerator {
 
                     // Ensure the 'item' folder exists
                     if (!outputFile.getParentFile().exists()) outputFile.getParentFile().mkdirs();
-
-//                    ImageIO.write(newTexture, "png", outputFile);
 
                     // 1. Convert BufferedImage to bytes
                     ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
